@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+# Initialize a new repository.
+
+REPO_FULLNAME="$1"
+
+
+if [[ -z "${REPO_FULLNAME}" ]] ; then
+  echo "Usage: nubs-init PATH"
+  exit 1
+fi
+
+REPO_BASENAME=$(basename -- "${REPO_FULLNAME}")
+EXTENSION="${REPO_BASENAME##*.}"
+REPO_NAME="${REPO_BASENAME%.*}"
+
+if [[ "${EXTENSION}" != "git" ]] ; then
+  echo "The repository name must include the .git extension."
+  exit 1
+fi
+
+if [[ "${REPO_NAME}.git" != "${REPO_FULLNAME}" ]] ; then
+  echo "The repository name can't be a path."
+  exit 1
+fi
+
+
+git init --bare "/nubs/${REPO_NAME}.git"

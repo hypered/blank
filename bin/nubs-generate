@@ -1,0 +1,53 @@
+#! /usr/bin/env bash
+
+# Create a static site for /nubs.
+
+# Takes a repository name as argument.
+
+echo "GENERATE Called with $1" >> /tmp/hello
+
+if [[ -z "$1" ]] ; then
+  echo "Usage: nubs-generate --all | REPO"
+  exit 1
+fi
+
+if [[ ! -d "/nubs/$1.git" ]] ; then
+  echo "No such repository."
+  exit 1
+fi
+
+if [[ "$1" == "--all" ]] ; then
+  find /nubs/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; > \
+    /tmp/list-of-repositories.txt
+else
+  echo "$1.git" > /tmp/list-of-repositories.txt
+fi
+
+
+cat /tmp/list-of-repositories.txt | \
+  while read -r line ; do
+    REPO="${line%.*}"
+
+    # Generate a mini-site for a particular repository.
+    echo "GENERATE Processing ${REPO}..." >> /tmp/hello
+    cd /home/thu/projects/nubs-bash
+    nix-prefetch-git --quiet --leave-dotGit "/nubs/${REPO}.git" > "nubs-${REPO}.json"
+    nix-build nubs.nix -A nubs.site -I "repository=nubs-${REPO}.json"
+    mkdir -p "../entrypoint/as-is/nubs-bash/${REPO}"
+    rsync -aP --delete result/ "../entrypoint/as-is/nubs-bash/${REPO}"
+    chmod u+w -R  "../entrypoint/as-is/nubs-bash/${REPO}"
+    touch "../entrypoint/as-is/nubs-bash/${REPO}"
+
+  done
+
+# Generate an index with a list of all repositories.
+cat templates/begin.html > ../entrypoint/as-is/nubs-bash/index.html
+find /nubs/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; | \
+  while read -r line ; do
+    REPO="${line%.*}"
+    echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
+      "../entrypoint/as-is/nubs-bash/index.html"
+  done
+cat templates/end.html >> ../entrypoint/as-is/nubs-bash/index.html
+
+echo "GENERATE Done." >> /tmp/hello
