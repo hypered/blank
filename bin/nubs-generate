@@ -24,19 +24,44 @@ else
 fi
 
 
+cd /home/thu/projects/nubs-bash
 cat /tmp/list-of-repositories.txt | \
   while read -r line ; do
     REPO="${line%.*}"
 
     # Generate a mini-site for a particular repository.
     echo "GENERATE Processing ${REPO}..." >> /tmp/hello
-    cd /home/thu/projects/nubs-bash
     nix-prefetch-git --quiet --leave-dotGit "/nubs/${REPO}.git" > "nubs-${REPO}.json"
-    nix-build nubs.nix -A nubs.site -I "repository=nubs-${REPO}.json"
-    mkdir -p "../entrypoint/as-is/nubs-bash/${REPO}"
-    rsync -aP --delete result/ "../entrypoint/as-is/nubs-bash/${REPO}"
-    chmod u+w -R  "../entrypoint/as-is/nubs-bash/${REPO}"
-    touch "../entrypoint/as-is/nubs-bash/${REPO}"
+    nix-build --option substitute false \
+      nubs.nix -A nubs.site -I "repository=nubs-${REPO}.json" > \
+      /tmp/nubs-build.log 2>&1
+    EXIT_CODE="$?"
+    cat /tmp/nubs-build.log
+    # TODO If the build fails. We should build the default page and include
+    # the build log.
+    if [[ $EXIT_CODE -ne 0 ]]; then
+
+      cat > failure.txt <<EOF
+<div class="red">
+<span">Build failure.</span>
+<code><pre>
+EOF
+      cat /tmp/nubs-build.log >> failure.txt
+      cat >> failure.txt <<EOF
+</pre></code></div>
+EOF
+      m1='^<!-- Build failure. -->$'
+      m2='^<!-- End build failure. -->$'
+      sed -i -e "/$m1/,/$m2/{ /$m1/{p; r failure.txt
+        }; /$m2/p; d }" \
+        "../entrypoint/as-is/nubs-bash/${REPO}/index.html"
+    else
+      mkdir -p "../entrypoint/as-is/nubs-bash/${REPO}"
+      rsync -aP --delete result/ "../entrypoint/as-is/nubs-bash/${REPO}/"
+      chmod u+w -R  "../entrypoint/as-is/nubs-bash/${REPO}"
+      # Nudge a bit browser-sync so it picks up changed files.
+      find "../entrypoint/as-is/nubs-bash/${REPO}" -exec touch {} \;
+    fi
 
   done
 

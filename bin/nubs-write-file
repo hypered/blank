@@ -10,7 +10,7 @@ echo WRITE Called with $1 $2 >> /tmp/hello
 
 
 if [[ -z "${REPO_NAME}" ]] ; then
-  echo "Usage: nubs-init REPO FILENAME"
+  echo "Usage: nubs-write-file REPO FILENAME"
   exit 1
 fi
 
@@ -22,7 +22,7 @@ if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
 fi
 
 if [[ -z "${FILE_NAME}" ]] ; then
-  echo "Usage: nubs-init REPO FILENAME"
+  echo "Usage: nubs-write-file REPO FILENAME"
   exit 1
 fi
 

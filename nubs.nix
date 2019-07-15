@@ -1,18 +1,16 @@
 let
   pkgs = import <nixpkgs> {};
-  repository-version = pkgs.lib.importJSON <repository>;
-  repository = pkgs.fetchgit {
-    # Ugly string conversion to path.
-    url = /. + ("/" + repository-version.url);
-    inherit (repository-version) rev sha256;
-    leaveDotGit = true; # There seems to be a risk of this feature being
-                        # removed because it can be non-deterministic.
-  };
+
+  fix = f: let x = f x; in x;
+  withOverrides = overrides: f: self: f self //
+    (if builtins.isFunction overrides then overrides self else overrides);
+  overrideable = f: fix f //
+    { _overrides = overrides: overrideable (withOverrides overrides f); };
 
   # Default values for the "nubs" attribute (i.e. for when
   # a default.nix file is not present or doesn't contain a
   # "nubs" attribute, or some sub-attribute).
-  defaults = rec {
+  defaults = overrideable (self: with self; {
 
     # The default "top" attribute is a Pandoc-rendered
     # README.md file if present.
@@ -67,21 +65,30 @@ let
       cp _site/index.html $out
     '';
 
-    # Pages is an additional list of files than can be included in the site.
+    # Pages is an additional list of directories than can be included in the site.
     # By default it is empty.
-    pages = pkgs.runCommand "pages" {} ''
-      mkdir $out
-    '';
+    pages = [];
 
     site = pkgs.runCommand "site" {} ''
       mkdir _site
       cat ${templates/begin.html} > _site/index.html
       cat ${index} >> _site/index.html
       cat ${templates/end.html} >> _site/index.html
+      for i in \
+        ${pkgs.lib.strings.concatStrings (pkgs.lib.strings.intersperse " " pages)} ; \
+        do cp -r $i/* _site/ ; done
       cp -r _site $out
-      find ${pages} -maxdepth 1 -not -name ${pages} -exec cp -r {} $out/ \;
     '';
 
+  });
+
+  repository-version = pkgs.lib.importJSON <repository>;
+  repository = pkgs.fetchgit {
+    # Ugly string conversion to path.
+    url = /. + ("/" + repository-version.url);
+    inherit (repository-version) rev sha256;
+    leaveDotGit = true; # There seems to be a risk of this feature being
+                        # removed because it can be non-deterministic.
   };
 
   # I don't know how to test if a file exists without
@@ -99,6 +106,6 @@ let
   default = import wrapper;
 
   # Default nubs attributes, shadowed by the user-defined ones.
-  nubs = defaults // (if (default ? "nubs") then default.nubs else {});
+  nubs = if (default ? "nubs") then defaults._overrides default.nubs else defaults;
 in
   default // { inherit nubs; }
