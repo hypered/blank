@@ -7,9 +7,9 @@ let
   overrideable = f: fix f //
     { _overrides = overrides: overrideable (withOverrides overrides f); };
 
-  # Default values for the "nubs" attribute (i.e. for when
+  # Default values for the "blank" attribute (i.e. for when
   # a default.nix file is not present or doesn't contain a
-  # "nubs" attribute, or some sub-attribute).
+  # "blank" attribute, or some sub-attribute).
   defaults = overrideable (self: with self; {
 
     # The default "top" attribute is a Pandoc-rendered
@@ -105,7 +105,7 @@ let
   # The user-defined default.nix, or an empty one.
   default = import wrapper;
 
-  # Default nubs attributes, shadowed by the user-defined ones.
-  nubs = if (default ? "nubs") then defaults._overrides default.nubs else defaults;
+  # Default blank attributes, shadowed by the user-defined ones.
+  blank = if (default ? "blank") then defaults._overrides default.blank else defaults;
 in
-  default // { inherit nubs; }
+  default // { inherit blank; }

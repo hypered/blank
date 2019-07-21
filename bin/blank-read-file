@@ -1,0 +1,41 @@
+#! /usr/bin/env bash
+
+# Read a file from a repository.
+# The file content is written to stdout.
+#
+# Example usage:
+#
+#   bin/blank-read-file blank README.md
+
+REPO_NAME="$1"
+FILE_NAME="$2"
+
+echo "blank-read-file Called with $1 $2" >> /blank/blank.log
+
+if [[ -z "${REPO_NAME}" ]] ; then
+  echo "Usage: blank-read-file REPO FILENAME"
+  exit 1
+fi
+
+REPO_BASENAME=$(basename -- "${REPO_NAME}")
+
+if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
+  echo "The repository name can't be a path."
+  exit 1
+fi
+
+if [[ -z "${FILE_NAME}" ]] ; then
+  echo "Usage: blank-read-file REPO FILENAME"
+  exit 1
+fi
+
+FILE_BASENAME=$(basename -- "${FILE_NAME}")
+
+if [[ "${FILE_BASENAME}" != "${FILE_NAME}" ]] ; then
+  echo "The filename can't be a path."
+  exit 1
+fi
+
+git \
+  --git-dir "/blank/${REPO_NAME}.git" \
+  show master:${FILE_NAME}

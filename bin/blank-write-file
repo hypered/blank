@@ -1,0 +1,82 @@
+#! /usr/bin/env bash
+
+# Write a file (combines add and commit) to a repository.
+# The file content is read from stdin.
+#
+# Example usage:
+#
+#   cat README.md | bin/blank-write-file blank README.md
+
+REPO_NAME="$1"
+FILE_NAME="$2"
+
+echo "blank-write-file Called with $1 $2" >> /blank/blank.log
+
+
+if [[ -z "${REPO_NAME}" ]] ; then
+  echo "Usage: blank-write-file REPO FILENAME"
+  exit 1
+fi
+
+REPO_BASENAME=$(basename -- "${REPO_NAME}")
+
+if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
+  echo "The repository name can't be a path."
+  exit 1
+fi
+
+if [[ -z "${FILE_NAME}" ]] ; then
+  echo "Usage: blank-write-file REPO FILENAME"
+  exit 1
+fi
+
+FILE_BASENAME=$(basename -- "${FILE_NAME}")
+
+if [[ "${FILE_BASENAME}" != "${FILE_NAME}" ]] ; then
+  echo "The filename can't be a path."
+  exit 1
+fi
+
+# Create the blob.
+BLOB_SHA1=$(git \
+  --git-dir "/blank/${REPO_NAME}.git" \
+  hash-object -w --stdin)
+
+# Add the blob to the index, which is either constructed from the state of HEAD
+# or a new empty tree.
+git --git-dir "/blank/${REPO_NAME}.git" read-tree HEAD > /dev/null 2>&1 \
+  || git --git-dir "/blank/${REPO_NAME}.git" read-tree --empty
+git --git-dir "/blank/${REPO_NAME}.git" update-index \
+  --add \
+  --cacheinfo 0644 "${BLOB_SHA1}" "${FILE_NAME}"
+
+# Create the tree, using the index.
+TREE_SHA1=$(git --git-dir "/blank/${REPO_NAME}.git" write-tree)
+
+# Find the current commit, which will serve as the parent of the one we
+# construct now.
+PARENT_SHA1=$(git --git-dir=/blank/${REPO_NAME}.git show-ref -s master)
+
+WITH_PARENT=""
+if [[ -n "${PARENT_SHA1}" ]] ; then
+  WITH_PARENT="-p ${PARENT_SHA1}"
+fi
+
+cat > "/blank/${REPO_NAME}.git/tempfile" <<EOF
+yourname
+your@email.com
+2013 12:20:15 +0200
+committername
+committer@email.com
+2013 10:13:15 +0200
+EOF
+
+# Create the commit.
+COMMIT_SHA1=$(cat "/blank/${REPO_NAME}.git/tempfile" | \
+ git --git-dir "/blank/${REPO_NAME}.git" \
+   commit-tree ${TREE_SHA1} ${WITH_PARENT})
+
+# Update master to the new commit.
+git \
+  --git-dir "/blank/${REPO_NAME}.git" \
+  update-ref refs/heads/master ${COMMIT_SHA1}

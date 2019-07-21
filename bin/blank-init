@@ -1,12 +1,13 @@
 #! /usr/bin/env bash
 
-# Initialize a new repository.
+# Initialize a new repository. This boils down to `git init --bare`.
+#
+# Example usage: blank-init hello.git
 
 REPO_FULLNAME="$1"
 
-
 if [[ -z "${REPO_FULLNAME}" ]] ; then
-  echo "Usage: nubs-init PATH"
+  echo "Usage: blank-init REPOSITORY"
   exit 1
 fi
 
@@ -24,5 +25,4 @@ if [[ "${REPO_NAME}.git" != "${REPO_FULLNAME}" ]] ; then
   exit 1
 fi
 
-
-git init --bare "/nubs/${REPO_NAME}.git"
+git init --bare "/blank/${REPO_NAME}.git"
