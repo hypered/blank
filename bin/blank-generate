@@ -21,15 +21,14 @@ if [[ -z "$1" ]] ; then
   exit 1
 fi
 
-if [[ ! -d "/blank/$1.git" ]] ; then
-  echo "No such repository."
-  exit 1
-fi
-
 if [[ "$1" == "--all" ]] ; then
   find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; > \
     /blank/list-of-repositories.txt
 else
+  if [[ ! -d "/blank/$1.git" ]] ; then
+    echo "No such repository."
+    exit 1
+  fi
   echo "$1.git" > /blank/list-of-repositories.txt
 fi
 
@@ -41,7 +40,8 @@ cat /blank/list-of-repositories.txt | \
 
     # Generate a mini-site for a particular repository.
     echo "blank-generate Processing ${REPO}..." >> /blank/blank.log
-    nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" > "blank-${REPO}.json"
+    nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" > \
+      "blank-${REPO}.json"
     nix-build --option substitute false \
       default.nix -A blank.site -I "repository=blank-${REPO}.json" > \
       /blank/build.log 2>&1
@@ -56,7 +56,7 @@ cat /blank/list-of-repositories.txt | \
 <span">Build failure.</span>
 <code><pre>
 EOF
-      cat /tmp/blank-build.log >> failure.txt
+      cat /blank/build.log >> failure.txt
       cat >> failure.txt <<EOF
 </pre></code></div>
 EOF
