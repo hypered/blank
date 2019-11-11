@@ -30,7 +30,9 @@ command-line or called by the HTTP backend:
 - `blank-write-file`: a script to commit a new file or changes to an existing
   file to a repository,
 - `blank-generate`: a script to generate static HTML files from a repository,
-- `blank-read-file`: a script to read a (raw) file from a Git repository.
+- `blank-read-file`: a script to read a (raw) file from a Git repository,
+- `blank-spawn`: a helper script to generate example repositories,
+- `blank-log`: a helper script to run `git log`.
 
 The HTTP backend is a small Haskell program to receive HTTP `POST`s to save
 files, and `GET`s to return the raw files.

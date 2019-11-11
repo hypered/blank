@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+# Run git log on a Blank repository.
+
+REPO_NAME="$1"
+
+if [[ -z "${REPO_NAME}" ]] ; then
+  echo "Usage: blank-log REPO"
+  exit 1
+fi
+
+REPO_BASENAME=$(basename -- "${REPO_NAME}")
+
+if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
+  echo "The repository name can't be a path."
+  exit 1
+fi
+
+git \
+  --git-dir "/blank/${REPO_NAME}.git" \
+  log --oneline
