@@ -60,11 +60,17 @@ $ sudo chown $USER:users /blank
 To build a repository in `/blank`, invoke `default.nix` as follow:
 
 ```
-$ nix-build -A blank.site -I repository=blank.json
+$ nix-build -A blank.site -I repository=examples/blank-empty.json
 ```
 
 Replace the `repository` variable by another repository as needed (see examples
 below).
+
+The `.json` files were created with:
+
+```
+$ nix-prefetch-git --quiet --leave-dotGit /blank/REPO.git > blank-REPO.json
+```
 
 In addition of the main attribute `blank.site`, which is the "whole" result,
 fragments can be built individually.
@@ -79,12 +85,22 @@ fragments can be built individually.
 
 ## Examples
 
+Example `.json` files are given in the `examples/` directory. They work with
+example repositories that can be created with the corresponding `spawn.sh`
+scripts, also in the `examples/` directory.
+
+For convenience, all the example repositories can be generated with:
+
+```
+$ bin/blank-spawn
+```
+
 Observe the `result` symlink after each of those commands:
 
 ```
-$ nix-build -A blank.top -I repository=blank-empty.json
-$ nix-build -A blank.top -I repository=blank-readme.json
-$ nix-build -A blank.top -I repository=blank-default.json
+$ nix-build -A blank.top -I repository=examples/blank-empty.json
+$ nix-build -A blank.top -I repository=examples/blank-readme.json
+$ nix-build -A blank.top -I repository=examples/blank-default.json
 ```
 
 

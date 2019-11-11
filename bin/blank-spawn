@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+# Populate /blank with example repositories.
+
+for i in empty readme default ; do
+  pushd examples/blank-$i
+  ./spawn.sh
+  popd
+done
