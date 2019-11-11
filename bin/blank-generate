@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Create a static site for /blank.
+# Create a static site for /blank, or a single repository.
 #
 # Most of the work is done by nix-build: building a repository results in a
 # static site presenting that repository at `result/`.
@@ -8,7 +8,7 @@
 # If the build fails, the failure is recorded and rendered elsewhere (`result/`
 # is for successful nix-build only).
 #
-# nix-build is called on blank.nix, which requires some angle-bracket to be
+# nix-build is called on default.nix, which requires some angle-bracket to be
 # filled; so this scripts first generates a JSON file (e.g. with the commit
 # being built).
 #
@@ -34,7 +34,7 @@ else
 fi
 
 
-cd /home/thu/projects/nubs-bash
+cd /home/thu/projects/blank
 cat /blank/list-of-repositories.txt | \
   while read -r line ; do
     REPO="${line%.*}"
@@ -43,11 +43,11 @@ cat /blank/list-of-repositories.txt | \
     echo "blank-generate Processing ${REPO}..." >> /blank/blank.log
     nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" > "blank-${REPO}.json"
     nix-build --option substitute false \
-      blank.nix -A blank.site -I "repository=blank-${REPO}.json" > \
+      default.nix -A blank.site -I "repository=blank-${REPO}.json" > \
       /blank/build.log 2>&1
     EXIT_CODE="$?"
     cat /blank/build.log
-    mkdir -p "../entrypoint/as-is/nubs-bash/${REPO}"
+    mkdir -p "../entrypoint/as-is/blank/${REPO}"
     if [[ $EXIT_CODE -ne 0 ]]; then
       echo "blank-generate Failure processing ${REPO}." >> /blank/blank.log
 
@@ -60,34 +60,34 @@ EOF
       cat >> failure.txt <<EOF
 </pre></code></div>
 EOF
-      if [[ -f "../entrypoint/as-is/nubs-bash/${REPO}/index.html" ]] ; then
+      if [[ -f "../entrypoint/as-is/blank/${REPO}/index.html" ]] ; then
         m1='^<!-- Build failure. -->$'
         m2='^<!-- End build failure. -->$'
         sed -i -e "/$m1/,/$m2/{ /$m1/{p; r failure.txt
           }; /$m2/p; d }" \
-          "../entrypoint/as-is/nubs-bash/${REPO}/index.html"
+          "../entrypoint/as-is/blank/${REPO}/index.html"
       else
-          cat failure.txt > "../entrypoint/as-is/nubs-bash/${REPO}/index.html"
+          cat failure.txt > "../entrypoint/as-is/blank/${REPO}/index.html"
       fi
     else
       echo "blank-generate Success processing ${REPO}." >> /blank/blank.log
-      rsync -aP --delete result/ "../entrypoint/as-is/nubs-bash/${REPO}/"
-      chmod u+w -R  "../entrypoint/as-is/nubs-bash/${REPO}"
+      rsync -aP --delete result/ "../entrypoint/as-is/blank/${REPO}/"
+      chmod u+w -R  "../entrypoint/as-is/blank/${REPO}"
       # Nudge a bit browser-sync so it picks up changed files.
-      find "../entrypoint/as-is/nubs-bash/${REPO}" -exec touch {} \;
+      find "../entrypoint/as-is/blank/${REPO}" -exec touch {} \;
     fi
 
   done
 
 # Generate an index with a list of all repositories.
 echo "blank-generate Generating index..." >> /blank/blank.log
-cat templates/begin.html > ../entrypoint/as-is/nubs-bash/index.html
+cat templates/begin.html > ../entrypoint/as-is/blank/index.html
 find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; | \
   while read -r line ; do
     REPO="${line%.*}"
     echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
-      "../entrypoint/as-is/nubs-bash/index.html"
+      "../entrypoint/as-is/blank/index.html"
   done
-cat templates/end.html >> ../entrypoint/as-is/nubs-bash/index.html
+cat templates/end.html >> ../entrypoint/as-is/blank/index.html
 
 echo "blank-generate Done." >> /blank/blank.log
