@@ -5,8 +5,8 @@ through HTTP.
 
 It is currently a rough proof-of-concept.
 
-Each Git repository is rendered as a single HTML page: files within the
-repository are displayed one after the other. The top of the page can
+By default, each Git repository is rendered as a single HTML page: files within
+the repository are displayed one after the other. The top of the page can
 optionally contain HTML generated from the repository by a build script. This
 is for instance the default when there is a README.md file: the Markdown is
 converted to HTML with Pandoc.
@@ -103,6 +103,7 @@ Observe the `result` symlink after each of those commands:
 $ nix-build -A blank.top -I repository=examples/blank-empty.json
 $ nix-build -A blank.top -I repository=examples/blank-readme.json
 $ nix-build -A blank.top -I repository=examples/blank-default.json
+$ nix-build -A blank.top -I repository=examples/blank-pages.json
 ```
 
 
