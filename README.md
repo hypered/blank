@@ -57,7 +57,7 @@ $ sudo chown $USER:users /blank
 ```
 
 
-## Running
+## Using the `default.nix` Nix expression
 
 To build a repository in `/blank`, invoke `default.nix` as follow:
 
@@ -85,7 +85,7 @@ fragments can be built individually.
 - `blank.site` is the full static site directory.
 
 
-## Examples
+### Examples
 
 Example `.json` files are given in the `examples/` directory. They work with
 example repositories that can be created with the corresponding `spawn.sh`
@@ -114,6 +114,23 @@ Creating a new repository within `/blank` can be done with `blank-init`:
 $ bin/blank-init blank.git
 Initialized empty Git repository in /blank/blank.git/
 ```
+
+Adding a file (or adding its modifications) to an existing repository is done
+with `blank-write-file`:
+
+```
+$ cat README.md | bin/blank-write-file blank README.md
+```
+
+Generating a complete static site for all the repositories (including an index
+page) can be done with `blank-generate`:
+
+```
+$ bin/blank-generate --all
+```
+
+Note: Running `blank-generate` on an empty repository will generate an error
+page.
 
 
 ## Notes
