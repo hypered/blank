@@ -7,6 +7,16 @@ let
   overrideable = f: fix f //
     { _overrides = overrides: overrideable (withOverrides overrides f); };
 
+  repository-version = pkgs.lib.importJSON <repository>;
+  repository = pkgs.fetchgit {
+    # Ugly string conversion to path.
+    url = /. + ("/" + repository-version.url);
+    inherit (repository-version) rev sha256;
+    leaveDotGit = true; # There seems to be a risk of this feature being
+                        # removed because it can be non-deterministic.
+  };
+  repo-basename=pkgs.lib.strings.removePrefix "/blank/" repository-version.url;
+
   # Default values for the "blank" attribute (i.e. for when
   # a default.nix file is not present or doesn't contain a
   # "blank" attribute, or some sub-attribute).
@@ -22,7 +32,6 @@ let
         echo 'No README.md file.' > $out
       fi
     '';
-    repo-basename=pkgs.lib.strings.removePrefix "/blank/" repository-version.url;
 
     # The default "index" attribute is the main HTML page.
     # Normally it is not overridden.
@@ -84,15 +93,6 @@ let
     '';
 
   });
-
-  repository-version = pkgs.lib.importJSON <repository>;
-  repository = pkgs.fetchgit {
-    # Ugly string conversion to path.
-    url = /. + ("/" + repository-version.url);
-    inherit (repository-version) rev sha256;
-    leaveDotGit = true; # There seems to be a risk of this feature being
-                        # removed because it can be non-deterministic.
-  };
 
   # I don't know how to test if a file exists without
   # resorting to a shell script, and I can import default.nix
