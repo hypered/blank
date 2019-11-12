@@ -22,11 +22,14 @@ let
         echo 'No README.md file.' > $out
       fi
     '';
+    repo-basename=pkgs.lib.strings.removePrefix "/blank/" repository-version.url;
 
     # The default "index" attribute is the main HTML page.
     # Normally it is not overridden.
     index = pkgs.runCommand "index.html" { buildInputs = [ pkgs.git ]; } ''
       mkdir _site
+      echo ${repository} >> _site/index.html
+      REPO_NAME=$(echo "${pkgs.lib.strings.removeSuffix ".git" repo-basename}")
       cat ${top} >> _site/index.html
       echo "<hr />" >> _site/index.html
 
@@ -51,7 +54,7 @@ let
           echo "<form method=post action=/edit/save onsubmit='this.content.value=document.getElementById(\"c$i\").innerHTML;'>" > content.tmp3
           echo "show fetchgit:$line " >> content.tmp3
           echo "<input type=submit value=Save class=button-as-link />" >> content.tmp3
-          echo "<input type=hidden name=repository value=hello />" >> content.tmp3
+          echo "<input type=hidden name=repository value=$REPO_NAME />" >> content.tmp3
           echo "<input type=hidden name=filename value=$line />" >> content.tmp3
           echo "<input type=hidden name=content />" >> content.tmp3
           echo "<code><pre id=c$i contenteditable=true spellcheck=false>" >> content.tmp3
