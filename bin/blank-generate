@@ -41,9 +41,9 @@ cat /blank/list-of-repositories.txt | \
     # Generate a mini-site for a particular repository.
     echo "blank-generate Processing ${REPO}..." >> /blank/blank.log
     nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" > \
-      "blank-${REPO}.json"
+      "/blank/${REPO}.json"
     nix-build --option substitute false \
-      default.nix -A blank.site -I "repository=blank-${REPO}.json" > \
+      default.nix -A blank.site -I "repository=/blank/${REPO}.json" > \
       /blank/build.log 2>&1
     EXIT_CODE="$?"
     cat /blank/build.log
@@ -51,23 +51,23 @@ cat /blank/list-of-repositories.txt | \
     if [[ $EXIT_CODE -ne 0 ]]; then
       echo "blank-generate Failure processing ${REPO}." >> /blank/blank.log
 
-      cat > failure.txt <<EOF
+      cat > /blank/failure.txt <<EOF
 <div class="red">
 <span">Build failure.</span>
 <code><pre>
 EOF
-      cat /blank/build.log >> failure.txt
-      cat >> failure.txt <<EOF
+      cat /blank/build.log >> /blank/failure.txt
+      cat >> /blank/failure.txt <<EOF
 </pre></code></div>
 EOF
       if [[ -f "../entrypoint/as-is/blank/${REPO}/index.html" ]] ; then
         m1='^<!-- Build failure. -->$'
         m2='^<!-- End build failure. -->$'
-        sed -i -e "/$m1/,/$m2/{ /$m1/{p; r failure.txt
+        sed -i -e "/$m1/,/$m2/{ /$m1/{p; r /blank/failure.txt
           }; /$m2/p; d }" \
           "../entrypoint/as-is/blank/${REPO}/index.html"
       else
-          cat failure.txt > "../entrypoint/as-is/blank/${REPO}/index.html"
+          cat /blank/failure.txt > "../entrypoint/as-is/blank/${REPO}/index.html"
       fi
     else
       echo "blank-generate Success processing ${REPO}." >> /blank/blank.log
