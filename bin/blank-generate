@@ -63,23 +63,23 @@ cat "${RUN_DIR}/list-of-repositories.txt" | \
     if [[ $EXIT_CODE -ne 0 ]]; then
       echo "blank-generate Failure processing ${REPO}." >> /blank/blank.log
 
-      cat > /blank/failure.txt <<EOF
+      cat > "${RUN_DIR}/failure.txt" <<EOF
 <div class="red">
 <span">Build failure.</span>
 <code><pre>
 EOF
-      cat /blank/build.log >> /blank/failure.txt
-      cat >> /blank/failure.txt <<EOF
+      cat /blank/build.log >> "${RUN_DIR}/failure.txt"
+      cat >> "${RUN_DIR}/failure.txt" <<EOF
 </pre></code></div>
 EOF
       if [[ -f "${SITE_DIR}/${REPO}/index.html" ]] ; then
         m1='^<!-- Build failure. -->$'
         m2='^<!-- End build failure. -->$'
-        sed -i -e "/$m1/,/$m2/{ /$m1/{p; r /blank/failure.txt
+        sed -i -e "/$m1/,/$m2/{ /$m1/{p; r ${RUN_DIR}/failure.txt
           }; /$m2/p; d }" \
           "${SITE_DIR}/${REPO}/index.html"
       else
-          cat /blank/failure.txt > "${SITE_DIR}/${REPO}/index.html"
+          cat "${RUN_DIR}/failure.txt" > "${SITE_DIR}/${REPO}/index.html"
       fi
     else
       echo "blank-generate Success processing ${REPO}." >> /blank/blank.log
