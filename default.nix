@@ -33,28 +33,28 @@ let
       fi
     '';
 
-    # The default "index" attribute is the main HTML page.
-    # Normally it is not overridden.
-    index = pkgs.runCommand "index.html" { buildInputs = [ pkgs.git ]; } ''
-      mkdir _site
-      echo ${repository} >> _site/index.html
+    # The "overview" attribute shows Git information and content
+    # as one page. It can be displayed after "top", on the same
+    # page, or on its own page.
+    overview = pkgs.runCommand "overview.html" { buildInputs = [ pkgs.git ]; } ''
       REPO_NAME=$(echo "${pkgs.lib.strings.removeSuffix ".git" repo-basename}")
-      cat ${top} >> _site/index.html
-      echo "<hr />" >> _site/index.html
 
-      echo "show-ref -s fetchgit" > content.tmp1
+      mkdir _site
+
+      echo ${repository} > content.tmp1
+      echo "show-ref -s fetchgit" >> content.tmp1
       echo "<code><pre>" >> content.tmp1
       git --git-dir=${repository}/.git show-ref -s fetchgit >> content.tmp1
       echo "</pre></code>" >> content.tmp1
       echo "<br />" >> content.tmp1
-      cat content.tmp1 >> _site/index.html
+      cat content.tmp1 >> _site/overview.html
 
       echo "ls-tree fetchgit --long" > content.tmp2
       echo "<code><pre>" >> content.tmp2
       git --git-dir=${repository}/.git ls-tree fetchgit --long >> content.tmp2
       echo "</pre></code>" >> content.tmp2
       echo "<br />" >> content.tmp2
-      cat content.tmp2 >> _site/index.html
+      cat content.tmp2 >> _site/overview.html
 
       i=0
       git --git-dir=${repository}/.git ls-tree fetchgit --name-only | \
@@ -71,9 +71,19 @@ let
           echo "</pre></code>" >> content.tmp3
           echo "</form>" >> content.tmp3
           echo "<br />" >> content.tmp3
-          cat content.tmp3 >> _site/index.html
+          cat content.tmp3 >> _site/overview.html
         done
 
+      cp _site/overview.html $out
+    '';
+
+    # The default "index" attribute is the main HTML page.
+    # Normally it is not overridden.
+    index = pkgs.runCommand "index.html" { buildInputs = [ pkgs.git ]; } ''
+      mkdir _site
+      cat ${top} >> _site/index.html
+      echo "<hr />" >> _site/index.html
+      cat ${overview} >> _site/index.html
       cp _site/index.html $out
     '';
 
@@ -81,11 +91,32 @@ let
     # By default it is empty.
     pages = [];
 
+    # By default, the Git repository metadata and editable files are on
+    # the index page.
+    separate-overview = false;
+
     site = pkgs.runCommand "site" {} ''
+      SEPARATE_OVERVIEW="$(echo ${if separate-overview then "1" else ""})"
+
       mkdir _site
+
       cat ${templates/begin.html} > _site/index.html
-      cat ${index} >> _site/index.html
+      cat ${top} >> _site/index.html
+      if [[ -n $SEPARATE_OVERVIEW ]] ; then
+        cat ${templates/begin.html} > _site/overview.html
+        cat ${overview} >> _site/overview.html
+        echo "<hr />" >> _site/overview.html
+        echo "<a href=\"index.html\">view</a>" >> _site/overview.html
+        cat ${templates/end.html} >> _site/overview.html
+
+        echo "<hr />" >> _site/index.html
+        echo "<a href=\"overview.html\">edit</a>" >> _site/index.html
+      else
+        echo "<hr />" >> _site/index.html
+        cat ${overview} >> _site/index.html
+      fi
       cat ${templates/end.html} >> _site/index.html
+
       for i in \
         ${pkgs.lib.strings.concatStrings (pkgs.lib.strings.intersperse " " pages)} ; \
         do cp -r $i/* _site/ ; done
