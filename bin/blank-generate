@@ -93,6 +93,7 @@ EOF
 echo "blank-generate Generating index..." >> /blank/blank.log
 cat templates/begin.html > "${SITE_DIR}/index.html"
 find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; | \
+    sort | \
   while read -r line ; do
     REPO="${line%.*}"
     echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
