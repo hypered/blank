@@ -54,7 +54,8 @@ cat "${RUN_DIR}/list-of-repositories.txt" | \
     nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" > \
       "/blank/${REPO}.json"
     nix-build --option substitute false \
-      default.nix -A blank.site -I "repository=/blank/${REPO}.json" > \
+      default.nix -A blank.site -I "repository=/blank/${REPO}.json" \
+      --out-link "${RUN_DIR}/result" > \
       /blank/build.log 2>&1
     EXIT_CODE="$?"
     cat /blank/build.log
@@ -82,7 +83,7 @@ EOF
       fi
     else
       echo "blank-generate Success processing ${REPO}." >> /blank/blank.log
-      rsync -aP --delete result/ "${SITE_DIR}/${REPO}/"
+      rsync -aP --delete "${RUN_DIR}/result/" "${SITE_DIR}/${REPO}/"
       chmod u+w -R  "${SITE_DIR}/${REPO}"
     fi
 
