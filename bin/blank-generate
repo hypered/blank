@@ -21,20 +21,31 @@ if [[ -z "$1" ]] ; then
   exit 1
 fi
 
+mkdir -p /blank/run
+# When run through the web server, this generates a directory
+# within /run/user/1000/, not within /blank/run.
+# Indeed, nix-shell -p cowsay --run 'mktemp -d -p /blank/run -t blank.XXXXXX'
+# is also using /run/user/1000.
+RUN_DIR=$(mktemp -d -p /blank/run -t blank-XXXXXX)
+SITE_DIR="${RUN_DIR}/_site"
+mkdir -p "${SITE_DIR}"
+
+echo "blank-generate Using RUN_DIR ${RUN_DIR}" >> /blank/blank.log
+
 if [[ "$1" == "--all" ]] ; then
   find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; > \
-    /blank/list-of-repositories.txt
+    "${RUN_DIR}/list-of-repositories.txt"
 else
   if [[ ! -d "/blank/$1.git" ]] ; then
     echo "No such repository."
     exit 1
   fi
-  echo "$1.git" > /blank/list-of-repositories.txt
+  echo "$1.git" > "${RUN_DIR}/list-of-repositories.txt"
 fi
 
 
 cd /home/thu/projects/blank
-cat /blank/list-of-repositories.txt | \
+cat "${RUN_DIR}/list-of-repositories.txt" | \
   while read -r line ; do
     REPO="${line%.*}"
 
@@ -47,7 +58,7 @@ cat /blank/list-of-repositories.txt | \
       /blank/build.log 2>&1
     EXIT_CODE="$?"
     cat /blank/build.log
-    mkdir -p "../entrypoint/as-is/blank/${REPO}"
+    mkdir -p "${SITE_DIR}/${REPO}"
     if [[ $EXIT_CODE -ne 0 ]]; then
       echo "blank-generate Failure processing ${REPO}." >> /blank/blank.log
 
@@ -60,34 +71,37 @@ EOF
       cat >> /blank/failure.txt <<EOF
 </pre></code></div>
 EOF
-      if [[ -f "../entrypoint/as-is/blank/${REPO}/index.html" ]] ; then
+      if [[ -f "${SITE_DIR}/${REPO}/index.html" ]] ; then
         m1='^<!-- Build failure. -->$'
         m2='^<!-- End build failure. -->$'
         sed -i -e "/$m1/,/$m2/{ /$m1/{p; r /blank/failure.txt
           }; /$m2/p; d }" \
-          "../entrypoint/as-is/blank/${REPO}/index.html"
+          "${SITE_DIR}/${REPO}/index.html"
       else
-          cat /blank/failure.txt > "../entrypoint/as-is/blank/${REPO}/index.html"
+          cat /blank/failure.txt > "${SITE_DIR}/${REPO}/index.html"
       fi
     else
       echo "blank-generate Success processing ${REPO}." >> /blank/blank.log
-      rsync -aP --delete result/ "../entrypoint/as-is/blank/${REPO}/"
-      chmod u+w -R  "../entrypoint/as-is/blank/${REPO}"
-      # Nudge a bit browser-sync so it picks up changed files.
-      find "../entrypoint/as-is/blank/${REPO}" -exec touch {} \;
+      rsync -aP --delete result/ "${SITE_DIR}/${REPO}/"
+      chmod u+w -R  "${SITE_DIR}/${REPO}"
     fi
 
   done
 
 # Generate an index with a list of all repositories.
 echo "blank-generate Generating index..." >> /blank/blank.log
-cat templates/begin.html > ../entrypoint/as-is/blank/index.html
+cat templates/begin.html > "${SITE_DIR}/index.html"
 find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; | \
   while read -r line ; do
     REPO="${line%.*}"
     echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
-      "../entrypoint/as-is/blank/index.html"
+      "${SITE_DIR}/index.html"
   done
-cat templates/end.html >> ../entrypoint/as-is/blank/index.html
+cat templates/end.html >> "${SITE_DIR}/index.html"
 
 echo "blank-generate Done." >> /blank/blank.log
+
+
+rsync -aP --delete "${SITE_DIR}/" "../entrypoint/as-is/blank/"
+# Nudge a bit browser-sync so it picks up changed files.
+find "../entrypoint/as-is/blank/" -exec touch {} \;
