@@ -42,6 +42,7 @@ let
       mkdir _site
 
       echo ${repository} > content.tmp1
+      echo "<br /><br />" >> content.tmp1
       echo "show-ref -s fetchgit" >> content.tmp1
       echo "<code><pre>" >> content.tmp1
       git --git-dir=${repository}/.git show-ref -s fetchgit >> content.tmp1
