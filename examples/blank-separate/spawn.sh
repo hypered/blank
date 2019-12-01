@@ -5,8 +5,15 @@
 set -e
 
 export GIT_DIR="/blank/blank-separate.git"
+
+# Set a few Git environment variables to always create exactly the same
+# repository.
+export GIT_AUTHOR_NAME="Alice"
+export GIT_AUTHOR_EMAIL="alice@example.com"
 export GIT_AUTHOR_DATE="1970-01-01T00:00:00"
-export GIT_COMMITTER_DATE="1970-01-01T00:00:00"
+export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+export GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
+export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 export TZ="UTC"
 
 git init --bare $GIT_DIR
