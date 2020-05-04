@@ -1,7 +1,8 @@
+Nothing new to pack.
 {
-  "url": "/blank/blank-readme.git",
-  "rev": "3e3e2a4eb7af980900075cdfe38f08a2a6a59176",
+  "url": "/blank/repos/alice/blank-readme.git",
+  "rev": "2947aa529a7b9be311396fd92e9afb481ca6890c",
   "date": "1970-01-01T00:00:00+00:00",
-  "sha256": "0r5g4h0php6vfpziahqb69a3b7ycr9dj54jahkymr2g6x1csiqa7",
+  "sha256": "1m1vlhl3nl0g039x4sicrchrvjgya0b0a2kjgh1gkwlsv0h56sd1",
   "fetchSubmodules": false
 }

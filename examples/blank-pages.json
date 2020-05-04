@@ -1,7 +1,8 @@
+Nothing new to pack.
 {
-  "url": "/blank/blank-pages.git",
-  "rev": "d6315b38c53b28ab7a84e5fe6cfb3284d0b6eda7",
+  "url": "/blank/repos/alice/blank-pages.git",
+  "rev": "4511705c9bf2c7e909c00846d6572245e01f204c",
   "date": "1970-01-01T00:00:00+00:00",
-  "sha256": "089i7jcpg3psmn6xy3jkldbqv4isij9463hn15ql7aqj9qw6kjsj",
+  "sha256": "1xk6amrdl3qq3qdsxb4crcy0hiq5hw1cpvzi255m3jdra1gzpdxh",
   "fetchSubmodules": false
 }

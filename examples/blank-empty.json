@@ -1,7 +1,8 @@
+Nothing new to pack.
 {
-  "url": "/blank/blank-empty.git",
-  "rev": "e4e86fc444f71176ae75d7a1dfea8540c9e28b1f",
+  "url": "/blank/repos/alice/blank-empty.git",
+  "rev": "407c822143e9c6eb8c6a389232e536fa629ebd4d",
   "date": "1970-01-01T00:00:00+00:00",
-  "sha256": "1swmj69hcj1aj92acfjdx4kz2h4m87k7r4dqpp46s1xk57ipyni4",
+  "sha256": "1akrwhzyafmgmij91a6bd73fi8yflrsf76blzd03n4c3r5ixbw49",
   "fetchSubmodules": false
 }
