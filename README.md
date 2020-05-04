@@ -23,10 +23,10 @@ to generate static pages.
 
 ## Organization
 
-There are four Bash scripts that can be either called manually from the
+There are a few Bash scripts that can be either called manually from the
 command-line or called by the HTTP backend:
 
-- `blank-init`: a script to create a new Git repository,
+- `blank-init`: a script to create a new empty Git repository,
 - `blank-write-file`: a script to commit a new file or changes to an existing
   file to a repository,
 - `blank-generate`: a script to generate static HTML files from a repository,
@@ -34,8 +34,9 @@ command-line or called by the HTTP backend:
 - `blank-spawn`: a helper script to generate example repositories,
 - `blank-log`: a helper script to run `git log`.
 
-The HTTP backend is a small Haskell program to receive HTTP `POST`s to save
-files, and `GET`s to return the raw files.
+The HTTP backend, `blank-server.hs`, is a small Haskell program to receive HTTP
+`POST`s at `/edit/save` to save files, and `GET`s at
+`/raw/:repository/:filename` to return the raw files.
 
 There is a HTML template used by the second script above.
 
@@ -112,7 +113,7 @@ $ nix-build -A blank.top -I repository=examples/blank-pages.json
 Creating a new repository within `/blank` can be done with `blank-init`:
 
 ```
-$ bin/blank-init blank.git
+$ bin/blank-init blank
 Initialized empty Git repository in /blank/blank.git/
 ```
 
@@ -132,6 +133,12 @@ $ bin/blank-generate --all
 
 Note: Running `blank-generate` on an empty repository will generate an error
 page.
+
+Reading a file:
+
+```
+$ bin/blank-read-file blank-readme README.md
+```
 
 
 ## Notes

@@ -2,27 +2,27 @@
 
 # Initialize a new repository. This boils down to `git init --bare`.
 #
-# Example usage: blank-init hello.git
+# Example usage: blank-init hello
 
-REPO_FULLNAME="$1"
+REPO_NAME="$1"
 
-if [[ -z "${REPO_FULLNAME}" ]] ; then
+echo "blank-int Called with $1" >> /blank/blank.log
+
+if [[ -z "${REPO_NAME}" ]] ; then
   echo "Usage: blank-init REPOSITORY"
   exit 1
 fi
 
-REPO_BASENAME=$(basename -- "${REPO_FULLNAME}")
-EXTENSION="${REPO_BASENAME##*.}"
-REPO_NAME="${REPO_BASENAME%.*}"
+REPO_BASENAME=$(basename -- "${REPO_NAME}")
 
-if [[ "${EXTENSION}" != "git" ]] ; then
-  echo "The repository name must include the .git extension."
-  exit 1
-fi
-
-if [[ "${REPO_NAME}.git" != "${REPO_FULLNAME}" ]] ; then
+if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
   echo "The repository name can't be a path."
   exit 1
 fi
 
 git init --bare "/blank/${REPO_NAME}.git"
+cat >> "/blank/${REPO_NAME}.git/config" <<EOF
+[user]
+	email = blank@reesd.com
+	name = Hypered Blank
+EOF
