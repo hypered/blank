@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Create a static site for /blank, or a single repository.
+# Create a static site for all repositories in /blank, or a single repository.
 #
 # Most of the work is done by nix-build: building a repository results in a
 # static site presenting that repository at `result/`.
@@ -9,7 +9,7 @@
 # is for successful nix-build only).
 #
 # nix-build is called on default.nix, which requires some angle-bracket to be
-# filled; so this scripts first generates a JSON file (e.g. with the commit
+# filled; so this script first generates a JSON file (e.g. with the commit
 # being built).
 #
 # Takes a repository name as argument or --all.
@@ -37,10 +37,11 @@ export NIX_PATH="nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
 echo "blank-generate Using NIX_PATH ${NIX_PATH}" >> /blank/blank.log
 
 if [[ "$1" == "--all" ]] ; then
-  find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; > \
-    "${RUN_DIR}/list-of-repositories.txt"
+  find /blank/repos/ -maxdepth 2 -type d -name '*.git' \
+    | sed 's@/blank/repos/@@' \
+    > "${RUN_DIR}/list-of-repositories.txt"
 else
-  if [[ ! -d "/blank/$1.git" ]] ; then
+  if [[ ! -d "/blank/repos/$1.git" ]] ; then
     echo "No such repository."
     exit 1
   fi
@@ -55,7 +56,7 @@ cat "${RUN_DIR}/list-of-repositories.txt" | \
 
     # Generate a mini-site for a particular repository.
     echo "blank-generate Processing ${REPO}..." >> /blank/blank.log
-    nix-prefetch-git --quiet --leave-dotGit "/blank/${REPO}.git" \
+    nix-prefetch-git --quiet --leave-dotGit "/blank/repos/${REPO}.git" \
       | grep -v "Nothing new to pack." \
       > "${RUN_DIR}/repo.json"
     echo "blank-generate Building ${REPO}..." >> /blank/blank.log
@@ -100,8 +101,9 @@ EOF
 # Generate an index with a list of all repositories.
 echo "blank-generate Generating index..." >> /blank/blank.log
 cat templates/begin.html > "${SITE_DIR}/index.html"
-find /blank/ -maxdepth 1 -type d -name '*.git' -exec basename {} \; | \
-    sort | \
+find /blank/repos/ -maxdepth 2 -type d -name '*.git' \
+  | sed 's@/blank/repos/@@' \
+  | sort | \
   while read -r line ; do
     REPO="${line%.*}"
     echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
