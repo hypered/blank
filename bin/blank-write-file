@@ -6,6 +6,11 @@
 # Example usage:
 #
 #   cat README.md | bin/blank-write-file blank README.md
+#
+# This is used by blank-server.hs to serve the /edit/save route:
+#
+#   curl -X POST -d repository=blank -d filename=README.md -d content=Wooh. \
+#     http://0.reesd.com/edit/save
 
 REPO_NAME="$1"
 FILE_NAME="$2"

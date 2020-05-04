@@ -6,6 +6,10 @@
 # Example usage:
 #
 #   bin/blank-read-file blank README.md
+#
+# This is used by blank-server.hs to serve the /raw route:
+#
+#   curl http://0.reesd.com/raw/blank/README.md
 
 REPO_NAME="$1"
 FILE_NAME="$2"
