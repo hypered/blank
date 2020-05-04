@@ -93,8 +93,8 @@ let
     pages = [];
 
     # By default, the Git repository metadata and editable files are on
-    # the index page.
-    separate-overview = false;
+    # a separate page.
+    separate-overview = true;
 
     site = pkgs.runCommand "site" {} ''
       SEPARATE_OVERVIEW="$(echo ${if separate-overview then "1" else ""})"

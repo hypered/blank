@@ -2,4 +2,4 @@
 
 This is an example repository for
 [hypered/blank](https://github.com/hypered/blank) containing a `default.nix`
-file that separate the index and overview pages.
+file that disable the separation of the index and overview pages.

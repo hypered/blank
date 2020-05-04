@@ -2,5 +2,5 @@ let
   pkgs = import <nixpkgs> {};
 in
   {
-    blank.separate-overview = true;
+    blank.separate-overview = false;
   }
