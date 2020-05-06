@@ -143,6 +143,8 @@ $ bin/blank-read-file blank-readme README.md
 
 ## Notes
 
+The templates is hard-coded for my Entrypoint navigation bar.
+
 I'd like to have a release.nix file that does the same as the derivation.nix
 one but fixes the versions (i.e. angle-bracket "holes").
 
