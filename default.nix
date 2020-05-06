@@ -15,7 +15,7 @@ let
     leaveDotGit = true; # There seems to be a risk of this feature being
                         # removed because it can be non-deterministic.
   };
-  repo-basename=pkgs.lib.strings.removePrefix "/blank/" repository-version.url;
+  repo-basename=pkgs.lib.strings.removePrefix "/blank/repos/" repository-version.url;
 
   # Default values for the "blank" attribute (i.e. for when
   # a default.nix file is not present or doesn't contain a
