@@ -2,14 +2,17 @@
 
 # Initialize a new repository. This boils down to `git init --bare`.
 #
-# Example usage: blank-init hello
+# Example usage:
+#
+#   blank-init alice/hello
 
-REPO_NAME="$1"
+USER_NAME="$(echo $1 | cut -d / -f 1)"
+REPO_NAME="$(echo $1 | cut -d / -f 2)"
 
 echo "blank-int Called with $1" >> /blank/blank.log
 
 if [[ -z "${REPO_NAME}" ]] ; then
-  echo "Usage: blank-init REPOSITORY"
+  echo "Usage: blank-init USER_NAME/REPO"
   exit 1
 fi
 
@@ -20,9 +23,11 @@ if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
   exit 1
 fi
 
-git init --bare "/blank/${REPO_NAME}.git"
-cat >> "/blank/${REPO_NAME}.git/config" <<EOF
+REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
+
+git init --bare "${REPO_PATH}"
+cat >> "${REPO_PATH}/config" <<EOF
 [user]
-	email = blank@reesd.com
-	name = Hypered Blank
+	email = ${USER_NAME}@users.noreply.reesd.com
+	name = ${USER_NAME}
 EOF

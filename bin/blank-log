@@ -1,8 +1,13 @@
 #! /usr/bin/env bash
 
 # Run git log on a Blank repository.
+#
+# Example usage:
+#
+#   bin/blank-read-file alice/blank-readme
 
-REPO_NAME="$1"
+USER_NAME="$(echo $1 | cut -d / -f 1)"
+REPO_NAME="$(echo $1 | cut -d / -f 2)"
 
 if [[ -z "${REPO_NAME}" ]] ; then
   echo "Usage: blank-log REPO"
@@ -16,6 +21,8 @@ if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
   exit 1
 fi
 
+REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
+
 git \
-  --git-dir "/blank/${REPO_NAME}.git" \
+  --git-dir "${REPO_PATH}" \
   log --oneline

@@ -60,7 +60,7 @@ $ sudo chown $USER:users /blank
 
 ## Using the `default.nix` Nix expression
 
-To build a repository in `/blank`, invoke `default.nix` as follow:
+To build a repository in `/blank/repos`, invoke `default.nix` as follow:
 
 ```
 $ nix-build -A blank.site -I repository=examples/blank-empty.json

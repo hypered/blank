@@ -1,7 +1,8 @@
+Nothing new to pack.
 {
-  "url": "/blank/blank-separate.git",
-  "rev": "b047354a67cae7d0d7c94926ae9afdc50e3e5d0d",
+  "url": "/blank/repos/alice/blank-separate.git",
+  "rev": "37a70de895a41b744037d87c0e1d3173e78c1c31",
   "date": "1970-01-01T00:00:00+00:00",
-  "sha256": "0fbkif5sag622ba4xdyb9g6nxms6xppkvqd3kidhrk4d6lqlv9dp",
+  "sha256": "04la5bl34cyk4j2qvg9z5bb0bmawlz568sc3a78rd47svg9plffm",
   "fetchSubmodules": false
 }

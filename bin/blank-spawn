@@ -1,8 +1,10 @@
 #! /usr/bin/env bash
 
-# Populate /blank with example repositories.
+# Populate /blank/repos/alice/ with example repositories.
 
-for i in empty readme default ; do
+mkdir -p /blank/repos/alice/
+
+for i in default empty failure pages readme separate ; do
   pushd examples/blank-$i
   ./spawn.sh
   popd
