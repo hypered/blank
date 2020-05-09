@@ -9,7 +9,7 @@
 #
 # This is used by blank-server.hs to serve the /raw route:
 #
-#   curl http://1.reesd.com/raw/alice/blank-readme/README.md
+#   curl http://1.reesd.com/~alice/raw/blank-readme/README.md
 
 USER_NAME="$(echo $1 | cut -d / -f 1)"
 REPO_NAME="$(echo $1 | cut -d / -f 2)"
@@ -45,7 +45,6 @@ fi
 
 REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
 
-echo ${REPO_PATH}
 git \
   --git-dir "${REPO_PATH}" \
   show master:${FILE_NAME}
