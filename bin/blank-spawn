@@ -2,7 +2,8 @@
 
 # Populate /blank/repos/alice/ with example repositories.
 
-mkdir -p /blank/repos/alice/
+HOME_DIR="/var/lib/blank"
+mkdir -p "${HOME_DIR}/repos/alice/"
 
 for i in default empty failure pages readme separate ; do
   pushd examples/blank-$i

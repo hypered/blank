@@ -14,34 +14,41 @@
 #
 # Takes a repository name as argument or --all.
 
-echo "blank-generate Called with $1" >> /blank/blank.log
+
+DIR="$(dirname "$(readlink -f "$0")")"
+HOME_DIR="/var/lib/blank"
+LOG_DIR="${HOME_DIR}/log"
+LOG_FILE="${LOG_DIR}/blank.log"
+mkdir -p "${LOG_DIR}"
+
+echo "blank-generate Called with $1" >> "${LOG_FILE}"
 
 if [[ -z "$1" ]] ; then
   echo "Usage: blank-generate --all | REPO"
   exit 1
 fi
 
-mkdir -p /blank/run
+mkdir -p /var/lib/blank/run
 # When run through the web server, this generates a directory
-# within /run/user/1000/, not within /blank/run.
-# Indeed, nix-shell -p cowsay --run 'mktemp -d -p /blank/run -t blank.XXXXXX'
+# within /run/user/1000/, not within /var/lib/blank/run.
+# Indeed, nix-shell -p cowsay --run 'mktemp -d -p /var/lib/blank/run -t blank.XXXXXX'
 # is also using /run/user/1000.
-RUN_DIR=$(mktemp -d -p /blank/run -t blank-XXXXXX)
+RUN_DIR=$(mktemp -d -p /var/lib/blank/run -t blank-XXXXXX)
 SITE_DIR="${RUN_DIR}/_site"
 mkdir -p "${SITE_DIR}"
 
-echo "blank-generate Using RUN_DIR ${RUN_DIR}" >> /blank/blank.log
+echo "blank-generate Using RUN_DIR ${RUN_DIR}" >> "${LOG_FILE}"
 
 # TODO The nixpkgs version should be more explicit than this.
-export NIX_PATH="nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
-echo "blank-generate Using NIX_PATH ${NIX_PATH}" >> /blank/blank.log
+# export NIX_PATH="nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
+# echo "blank-generate Using NIX_PATH ${NIX_PATH}" >> "${LOG_FILE}"
 
 if [[ "$1" == "--all" ]] ; then
-  find /blank/repos/ -maxdepth 2 -type d -name '*.git' \
-    | sed 's@/blank/repos/@@' \
+  find "${HOME_DIR}/repos/" -maxdepth 2 -type d -name '*.git' \
+    | sed "s@${HOME_DIR}/repos/@@" \
     > "${RUN_DIR}/list-of-repositories.txt"
 else
-  if [[ ! -d "/blank/repos/$1.git" ]] ; then
+  if [[ ! -d "${HOME_DIR}/repos/$1.git" ]] ; then
     echo "No such repository."
     exit 1
   fi
@@ -49,20 +56,18 @@ else
 fi
 
 
-cd /home/thu/projects/blank
 cat "${RUN_DIR}/list-of-repositories.txt" | \
   while read -r line ; do
     REPO="${line%.*}"
 
     # Generate a mini-site for a particular repository.
-    echo "blank-generate Processing ${REPO}..." >> /blank/blank.log
-    nix-prefetch-git --quiet --leave-dotGit "/blank/repos/${REPO}.git" \
+    echo "blank-generate Processing ${REPO}..." >> "${LOG_FILE}"
+    nix-prefetch-git --quiet --leave-dotGit "${HOME_DIR}/repos/${REPO}.git" \
       | grep -v "Nothing new to pack." \
       > "${RUN_DIR}/repo.json"
-    echo "blank-generate Building ${REPO}..." >> /blank/blank.log
+    echo "blank-generate Building ${REPO}..." >> "${LOG_FILE}"
     nix-build \
-      default.nix -A blank.site -I "repository=${RUN_DIR}/repo.json" \
-      --option substitute false \
+      "${DIR}/../default.nix" -A blank.site -I "repository=${RUN_DIR}/repo.json" \
       --out-link "${RUN_DIR}/result" > \
       "${RUN_DIR}/build.log" 2>&1
     EXIT_CODE="$?"
@@ -70,7 +75,7 @@ cat "${RUN_DIR}/list-of-repositories.txt" | \
     mkdir -p "${SITE_DIR}/${REPO}"
     if [[ $EXIT_CODE -ne 0 ]]; then
       echo "blank-generate Failure building ${REPO}. See ${RUN_DIR}/build.log." \
-        >> /blank/blank.log
+        >> "${LOG_FILE}"
 
       cat > "${RUN_DIR}/failure.txt" <<EOF
 <div class="red">
@@ -91,7 +96,7 @@ EOF
           cat "${RUN_DIR}/failure.txt" > "${SITE_DIR}/${REPO}/index.html"
       fi
     else
-      echo "blank-generate Success building ${REPO}." >> /blank/blank.log
+      echo "blank-generate Success building ${REPO}." >> "${LOG_FILE}"
       rsync -aP --delete "${RUN_DIR}/result/" "${SITE_DIR}/${REPO}/"
       chmod u+w -R  "${SITE_DIR}/${REPO}"
     fi
@@ -99,20 +104,20 @@ EOF
   done
 
 # Generate an index with a list of all repositories.
-echo "blank-generate Generating index..." >> /blank/blank.log
-cat templates/begin.html > "${SITE_DIR}/index.html"
-find /blank/repos/ -maxdepth 2 -type d -name '*.git' \
-  | sed 's@/blank/repos/@@' \
+echo "blank-generate Generating index..." >> "${LOG_FILE}"
+cat "${DIR}/../templates/begin.html" > "${SITE_DIR}/index.html"
+find "${HOME_DIR}/repos/" -maxdepth 2 -type d -name '*.git' \
+  | sed "s@${HOME_DIR}/repos/@@" \
   | sort | \
   while read -r line ; do
     REPO="${line%.*}"
     echo "<li><a href=${REPO}>${REPO}</a></li>" >> \
       "${SITE_DIR}/index.html"
   done
-cat templates/end.html >> "${SITE_DIR}/index.html"
+cat "${DIR}/../templates/end.html" >> "${SITE_DIR}/index.html"
 
-echo "blank-generate Done." >> /blank/blank.log
+echo "blank-generate Done." >> "${LOG_FILE}"
 
-mkdir -p /blank/site
+mkdir -p "/var/www/blank"
 find "${SITE_DIR}/" -exec touch {} \;
-rsync -aP "${SITE_DIR}/" "/blank/site/" >> /blank/rsync.log 2>&1
+rsync -aP "${SITE_DIR}/" "/var/www/blank/" >> "${HOME_DIR}/rsync.log" 2>&1

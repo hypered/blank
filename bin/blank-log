@@ -6,6 +6,8 @@
 #
 #   bin/blank-read-file alice/blank-readme
 
+HOME_DIR="/var/lib/blank"
+
 USER_NAME="$(echo $1 | cut -d / -f 1)"
 REPO_NAME="$(echo $1 | cut -d / -f 2)"
 
@@ -21,7 +23,7 @@ if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
   exit 1
 fi
 
-REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
+REPO_PATH="${HOME_DIR}/repos/${USER_NAME}/${REPO_NAME}.git"
 
 git \
   --git-dir "${REPO_PATH}" \

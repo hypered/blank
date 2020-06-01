@@ -1,4 +1,7 @@
 let
+  # When using a pinned nixpkgs here, unpacking the tarball in a runvm.sh VM
+  # takes too much memory and disk. Instead, care should be taken to build
+  # the VM with the correct nix.nixPath option.
   pkgs = import <nixpkgs> {};
 
   fix = f: let x = f x; in x;
@@ -15,7 +18,8 @@ let
     leaveDotGit = true; # There seems to be a risk of this feature being
                         # removed because it can be non-deterministic.
   };
-  repo-basename=pkgs.lib.strings.removePrefix "/blank/repos/" repository-version.url;
+  repo-basename=pkgs.lib.strings.removePrefix "/var/lib/blank/repos/"
+    repository-version.url;
 
   # Default values for the "blank" attribute (i.e. for when
   # a default.nix file is not present or doesn't contain a

@@ -16,7 +16,12 @@ USER_NAME="$(echo $1 | cut -d / -f 1)"
 REPO_NAME="$(echo $1 | cut -d / -f 2)"
 FILE_NAME="$2"
 
-echo "blank-write-file Called with $1 $2" >> /blank/blank.log
+HOME_DIR="/var/lib/blank"
+LOG_DIR="${HOME_DIR}/log"
+LOG_FILE="${LOG_DIR}/blank.log"
+mkdir -p "${LOG_DIR}"
+
+echo "blank-write-file Called with $1 $2" >> "${LOG_FILE}"
 
 
 if [[ -z "${REPO_NAME}" ]] ; then
@@ -43,7 +48,7 @@ if [[ "${FILE_BASENAME}" != "${FILE_NAME}" ]] ; then
   exit 1
 fi
 
-REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
+REPO_PATH="${HOME_DIR}/repos/${USER_NAME}/${REPO_NAME}.git"
 
 # Create the blob.
 BLOB_SHA1=$(git \

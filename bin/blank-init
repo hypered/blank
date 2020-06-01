@@ -9,7 +9,13 @@
 USER_NAME="$(echo $1 | cut -d / -f 1)"
 REPO_NAME="$(echo $1 | cut -d / -f 2)"
 
-echo "blank-int Called with $1" >> /blank/blank.log
+HOME_DIR="/var/lib/blank"
+LOG_DIR="${HOME_DIR}/log"
+LOG_FILE="${LOG_DIR}/blank.log"
+mkdir -p "${LOG_DIR}"
+mkdir -p "${HOME_DIR}/repos"
+
+echo "blank-int Called with $1" >> "${LOG_FILE}"
 
 if [[ -z "${REPO_NAME}" ]] ; then
   echo "Usage: blank-init USER_NAME/REPO"
@@ -23,7 +29,7 @@ if [[ "${REPO_NAME}" != "${REPO_BASENAME}" ]] ; then
   exit 1
 fi
 
-REPO_PATH="/blank/repos/${USER_NAME}/${REPO_NAME}.git"
+REPO_PATH="${HOME_DIR}/repos/${USER_NAME}/${REPO_NAME}.git"
 
 git init --bare "${REPO_PATH}"
 cat >> "${REPO_PATH}/config" <<EOF
