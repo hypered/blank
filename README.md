@@ -48,14 +48,67 @@ There is a Nix script, `default.nix`, that is used by `blank-generate`.
 
 ## Installing
 
+For local development:
+
 The scripts in the `bin/` directory expect an existing directory called
-`/blank`. It can be created as follow (assuming we run the backend with
+`/var/lib/blank`. It can be created as follow (assuming we run the backend with
 `$USER`):
 
 ```
-$ sudo mkdir /blank
-$ sudo chown $USER:users /blank
+$ sudo mkdir /var/lib/blank
+$ sudo chown $USER:users /var/lib/blank
 ```
+
+Within a NixOS VM, the above directory is automatically created. To create a
+repository for the user "noteed":
+
+```
+# su blank
+$ blank-init noteed/notes
+$ echo "Initialized with a commit." | blank-write-file noteed/notes README.md
+$ cd
+$ blank-generate --all
+```
+
+TODO Remove necessary cd above (blank-generate seems to write temporary files
+in the current directory, possibly for the nix-prefetch-git).
+
+TODO Remove the necessary commit above (blank-generate doesn't like empty
+repositories, so make it ok).
+
+Note: It seems blank-generate when unpacking nixpkgs (when pinned in
+default.nix) takes a lot of memory (more than the default 384MB from nix-notes)
+and disk. Instead I use `<nixpkgs>`, making sure it is the one I want, see
+below.
+
+Note: To use `<nixpkgs>` in the VM, either `NIX_PATH` or `nix.nixPath` should
+be set. The later is easier to use because it is set directly in the
+configuration. `NIX_PATH` can be set either by the calling script, or by using
+`nix-channel`. One problem is that it is difficult to use a pinned version;
+another problem is that the nixos.qcow2 file will retain some state, making its
+path pointing to an non-existing location in a next build of runvm.sh.
+
+One way to ensure (when debugging the VM) that the path is correct, is to directly try
+
+```
+# nix-shell -p hello # doesn't work initially
+```
+
+If it doesn't work, the following is a workaround, but as said previously, it
+is better to set nix.nixPath:
+
+```
+# nix-channel --update # display a warning, which doesn't appear afterwards
+$ ls -la /nix/var/nix/profiles/per-user/root/channels/nixos
+```
+
+So I don't pin nixpkgs within the configuration, I can instead do it by setting
+`NIX_PATH` within the `runvm.sh` script if necessary.
+
+Note: pkgs.pandoc is listead in the blank module to ensure it is already
+present in the VM. Otherwise it is downloaded the first time blank/default.nix
+is run. Since Pandoc depends on GHC, it takes a lot of time and can even use
+too much disk in a local runvm.sh VM.
 
 
 ## Using the `default.nix` Nix expression
