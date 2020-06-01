@@ -5,7 +5,8 @@
 
 set -e
 
-REPO_PATH="/blank/repos/alice/blank-failure.git"
+HOME_DIR="/var/lib/blank"
+REPO_PATH="${HOME_DIR}/repos/alice/blank-failure.git"
 export GIT_DIR="${REPO_PATH}"
 
 # Set a few Git environment variables to always create exactly the same
